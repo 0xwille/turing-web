@@ -1,0 +1,17 @@
+<div class="container">
+  <h1>Turing Machine simulator!
+  <div class="row">
+    <div class="col-sm-12 col-md-12">
+       <div class="row">
+         <div class="col-sm-12 col-md-12">
+           <pre id="#{results}">
+       <div class="row">
+         <div class="col-sm-12 col-md-12">
+           <button id="#{butBeginning}" class="btn">
+             <span class="glyphicon glyphicon-fast-backward">
+           <button id="#{butBackward}" class="btn">
+             <span class="glyphicon glyphicon-step-backward">
+           <button id="#{butTogglePlay}" class="btn">
+             <span class="glyphicon glyphicon-play">
+           <button id="#{butForward}" class="btn">
+             <span class="glyphicon glyphicon-step-forward">

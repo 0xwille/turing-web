@@ -1,0 +1,73 @@
+$(function() {
+  var ui = {
+    bBeginning  : $("##{rawJS butBeginning}"),
+    bBackward   : $("##{rawJS butBackward}"),
+    bTogglePlay : $("##{rawJS butTogglePlay}"),
+    bForward    : $("##{rawJS butForward}"),
+    results     : $("##{rawJS results}")
+  };
+  var pollInterval = 10000;
+  var playing = false;
+  var timeout = 150;
+  function poll() {
+    sock.send("Poll");
+    setTimeout(poll, pollInterval);
+  };
+  function forwardWait() {
+    if (playing === true) {
+      sock.send("Forward");
+      setTimeout(forwardWait, timeout);
+    }
+  };
+  function enableButtons(buttons) {
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].removeAttr("disabled");
+    };
+  };
+  function disableButtons(buttons) {
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].attr("disabled", "disabled");
+    };
+  };
+  function togglePlay() {
+    var btns = [ui.bBeginning, ui.bBackward, ui.bForward];
+    playing = !playing;
+    if (playing === true) {
+      disableButtons(btns);
+      forwardWait();
+    } else {
+      enableButtons(btns);
+    };
+  };
+  ui.bBeginning.on("click", function () {
+    sock.send("Beginning");
+  });
+  ui.bBackward.on("click", function () {
+    sock.send("Backward");
+  });
+  ui.bTogglePlay.on("click", function () {
+    ui.bTogglePlay.children().toggleClass("glyphicon-play glyphicon-stop");
+    togglePlay();
+  });
+  ui.bForward.on("click", function () {
+    sock.send("Forward");
+  });
+  sock = new WebSocket("ws://" + window.location.host);
+  sock.onopen = function (e) {
+    enableButtons([ui.bBeginning, ui.bBackward,
+                   ui.bTogglePlay, ui.bForward]);
+    poll();
+  };
+  sock.onclose = function (e) {
+    disableButtons([ui.bBeginning, ui.bBackward,
+                    ui.bTogglePlay, ui.bForward]);
+    alert("SOCKET CLOSED! D: (" + e.code + ")");
+  };
+  sock.onmessage = function (e) {
+    // var data = JSON.parse(e.data);
+    ui.results.html(e.data);
+  };
+  sock.onerror = function (e) {
+    alert("ERROR! D: (" + e + ")");
+  };
+});
