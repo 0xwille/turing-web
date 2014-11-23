@@ -52,7 +52,7 @@ $(function() {
   ui.bForward.on("click", function () {
     sock.send("Forward");
   });
-  sock = new WebSocket("ws://" + window.location.host);
+  sock = new WebSocket("wss://" + window.location.host);
   sock.onopen = function (e) {
     enableButtons([ui.bBeginning, ui.bBackward,
                    ui.bTogglePlay, ui.bForward]);
