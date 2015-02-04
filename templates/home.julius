@@ -4,7 +4,8 @@ $(function() {
     bBackward   : $("##{rawJS butBackward}"),
     bTogglePlay : $("##{rawJS butTogglePlay}"),
     bForward    : $("##{rawJS butForward}"),
-    results     : $("##{rawJS results}")
+    results     : $("##{rawJS results}"),
+    state       : $("##{rawJS state}")
   };
   var pollInterval = 10000;
   var playing = false;
@@ -65,7 +66,12 @@ $(function() {
   };
   sock.onmessage = function (e) {
     // var data = JSON.parse(e.data);
-    ui.results.html(e.data);
+    var data = e.data;
+    if (data[1] === "+") {
+      ui.state.html(data);
+    } else {
+      ui.results.html(data);
+    }
   };
   sock.onerror = function (e) {
     alert("ERROR! D: (" + e + ")");

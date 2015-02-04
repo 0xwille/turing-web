@@ -12,7 +12,8 @@ import Turing.Machine
 data Cmd = Beginning | Backward | Forward | Poll deriving Read
 
 wsTuring :: WebSocketsT Handler ()
-wsTuring = evalLoop defaultMachine [defaultConfig]
+wsTuring = do sendTextData . T.pack $ showTrans (trans defaultMachine)
+              evalLoop defaultMachine [defaultConfig]
     where defaultMachine = mWriteStr "Hello!"
           defaultConfig = mkConfig . map charToSym $  "_"
           evalLoop m [] = evalLoop m [defaultConfig]
@@ -42,6 +43,7 @@ getHomeR = do
 
     -- Identifiers used in HTML/JS code
     results <- newIdent
+    state <- newIdent
     butBeginning <- newIdent
     butBackward <- newIdent
     butTogglePlay <- newIdent
