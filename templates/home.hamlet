@@ -1,7 +1,12 @@
 <div class="container">
-  <h1>Turing Machine simulator!
+  <h1>Turing Machine simulator
   <div class="row">
     <div class="col-sm-12 col-md-12">
+       <div class="row">
+         <div class="col-sm-12 col-md-12">
+         <p>Some examples: #
+           <a id="#{eHello}" href="#">Hello, #
+           <a id="#{eSub}" href="#">Unary substraction (5-2)
        <div class="row">
          <div class="col-sm-12 col-md-12">
            <pre id="#{prTape}">

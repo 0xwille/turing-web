@@ -12,37 +12,43 @@ import Yesod.WebSockets
 import Turing.Examples
 import Turing.Machine
 
-data Cmd = Beginning | Backward | Forward | Poll deriving Read
+data Cmd = Beginning | Backward | Forward | Poll | MHello | MSub deriving Read
 
-data UpdM = UpdTape String | UpdTrans String
-instance FromJSON UpdM where
-  parseJSON (Object v) = cons =<< (v .: "type")
-    where cons :: String -> Parser UpdM
-          cons t = (if t == "tape" then UpdTape else UpdTrans) <$> v .: "value"
-  parseJSON _ = mzero
+data UpdM = UpdTape String | UpdTrans String | Stop
+-- instance FromJSON UpdM where
+--   parseJSON (Object v) = cons =<< (v .: "type")
+--     where cons :: String -> Parser UpdM
+--           cons t = (if t == "tape" then UpdTape else UpdTrans) <$> v .: "value"
+--   parseJSON _ = mzero
 instance ToJSON UpdM where
   toJSON um = object ["type" .= ty, "value" .= v]
     where (ty, v) = case um of
                      UpdTape s -> ("tape"::String, s)
                      UpdTrans s -> ("trans", s)
+                     Stop -> ("stop", "")
 
 wsTuring :: WebSocketsT Handler ()
-wsTuring = do sendTextData . encode . UpdTrans . showTrans . trans $
-                defaultMachine
-              evalLoop defaultMachine [defaultConfig]
-    where defaultMachine = mWriteStr "Hello!"
+wsTuring = startMachine mHello defaultConfig
+    where startMachine m ic = do
+            sendTextData . encode . UpdTrans . showTrans . trans $ m
+            evalLoop m ic [ic]
+          mHello = mWriteStr "Hello!"
+          mSubConfig = mkConfig . map charToSym $ "_aaaaaa_aaa"
           defaultConfig = mkConfig . map charToSym $  "_"
-          evalLoop m [] = evalLoop m [defaultConfig]
-          evalLoop m cfgs@(c:cs) = do
+          evalLoop m ic [] = evalLoop m ic [ic]
+          evalLoop m ic cfgs@(c:cs) = do
             sendTextData . encode . UpdTape . show $ c
             cmd <- receiveData
             case (read . T.unpack $ cmd) of
-              Beginning -> evalLoop defaultMachine [defaultConfig]
-              Backward -> evalLoop m cs
+              Beginning -> evalLoop m ic [ic]
+              Backward -> evalLoop m ic cs
               Forward -> case step c (delta m) of
-                           Just c' -> evalLoop m (c':cfgs)
-                           Nothing -> evalLoop m cfgs
-              Poll -> evalLoop m cfgs
+                           Just c' -> evalLoop m ic (c':cfgs)
+                           Nothing -> do sendTextData . encode $ Stop
+                                         evalLoop m ic cfgs
+              Poll -> evalLoop m ic cfgs
+              MHello -> startMachine mHello defaultConfig
+              MSub -> startMachine mSub mSubConfig
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -64,5 +70,7 @@ getHomeR = do
     butForward <- newIdent
     prTape <- newIdent
     prTrans <- newIdent
+    eHello <- newIdent
+    eSub <- newIdent
 
     $(widgetFile "home")

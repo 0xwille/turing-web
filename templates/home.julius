@@ -5,7 +5,9 @@ $(function() {
     bTogglePlay : $("##{rawJS butTogglePlay}"),
     bForward    : $("##{rawJS butForward}"),
     prTape      : $("##{rawJS prTape}"),
-    prTrans     : $("##{rawJS prTrans}")
+    prTrans     : $("##{rawJS prTrans}"),
+    eHello      : $("##{rawJS eHello}"),
+    eSub        : $("##{rawJS eSub}"),
   };
   var pollInterval = 10000;
   var playing = false;
@@ -32,6 +34,7 @@ $(function() {
   };
   function togglePlay() {
     var btns = [ui.bBeginning, ui.bBackward, ui.bForward];
+    ui.bTogglePlay.children().toggleClass("glyphicon-play glyphicon-stop");
     playing = !playing;
     if (playing === true) {
       disableButtons(btns);
@@ -47,13 +50,18 @@ $(function() {
     sock.send("Backward");
   });
   ui.bTogglePlay.on("click", function () {
-    ui.bTogglePlay.children().toggleClass("glyphicon-play glyphicon-stop");
     togglePlay();
   });
   ui.bForward.on("click", function () {
     sock.send("Forward");
   });
   sock = new WebSocket("wss://" + window.location.host);
+  ui.eHello.on("click", function () {
+    sock.send("MHello");
+  });
+  ui.eSub.on("click", function () {
+    sock.send("MSub");
+  });
   sock.onopen = function (e) {
     enableButtons([ui.bBeginning, ui.bBackward,
                    ui.bTogglePlay, ui.bForward]);
@@ -62,7 +70,8 @@ $(function() {
   sock.onclose = function (e) {
     disableButtons([ui.bBeginning, ui.bBackward,
                     ui.bTogglePlay, ui.bForward]);
-    alert("SOCKET CLOSED! D: (" + e.code + ")");
+    alert("WEBSOCKET CLOSED. At this point, reloading the page " +
+          "is probably the wise thing to do.");
   };
   sock.onmessage = function (e) {
     var data = JSON.parse(e.data);
@@ -70,9 +79,11 @@ $(function() {
       ui.prTape.html(data["value"]);
     } else if (data["type"] === "trans") {
       ui.prTrans.html(data["value"]);
+    } else if (data["type"] === "stop") {
+      togglePlay();
     }
   };
   sock.onerror = function (e) {
-    alert("ERROR! D: (" + e + ")");
+    console.debug("ERROR: " + e.data);
   };
 });
