@@ -5,7 +5,6 @@ import Import
 import qualified Data.Map.Strict as Map
 
 import Data.List
-import Data.Monoid
 import Control.Monad
 
 data Symbol = SymInit | SymWild | SymSpace | Symbol Char deriving (Eq, Ord)
@@ -54,13 +53,15 @@ instance Monoid Machine where
     mappend = comp
 
 showTrans :: Trans -> String
-showTrans trs = separator ++ intercalate' "\n" table ++ separator
-    where separator = " +" ++ concatMap (\s -> replicate s '-' ++ "--+") lengths
-          table = map (intercalate' " | "
-                       . map (\ (ml, f) -> replicate (ml - length f) ' ' ++ f)
-                       . zip lengths) fields
-          lengths = map (maximum . map length) (transpose fields)
-          fields = map (\ ((a, b), (c, d)) -> [show a, show b, show c, show d])
+showTrans trs = sep ++ intercalate' "\n" table ++ sep
+    where sep = " +" ++ concatMap (\s -> replicate s '-' ++ "--+") lengths
+          table = showRow header : sep : map showRow rows
+          showRow = intercalate' " | "
+                    . map (\ (ml, f) -> replicate (ml - length f) ' ' ++ f)
+                    . zip lengths
+          lengths = map (maximum . map length) (transpose (header : rows))
+          header = ["Curr. state","Curr. symbol","Action","Next state"]
+          rows = map (\ ((a, b), (c, d)) -> [show a, show b, show c, show d])
                    (Map.toList trs)
           intercalate' x xs = x ++ intercalate x xs ++ x
 
@@ -128,12 +129,12 @@ step (Config t p s) d = fmap doAction (d s (t !! p))
           doAction (R, s') = Config (adjust t (p+1)) (p+1) s'
           doAction (W sy, s')
               | sy == SymWild = Config t p s'
-              | otherwise  = Config (adjust (replace t p sy) p) p s'
+              | otherwise  = Config (adjust (replaceAt t p sy) p) p s'
           adjust l newpos
               | diff > 0 = l ++ replicate diff SymSpace
               | diff < 0 && last l == SymSpace = init l
               | otherwise = l
               where diff = newpos - (length l - 1)
-          replace [] _ _ = []
-          replace (_:xs) 0 e = e : xs
-          replace (x:xs) n e = x : replace xs (n-1) e
+          replaceAt [] _ _ = []
+          replaceAt (_:xs) 0 e = e : xs
+          replaceAt (x:xs) n e = x : replaceAt xs (n-1) e

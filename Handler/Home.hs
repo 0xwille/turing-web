@@ -3,10 +3,8 @@ module Handler.Home where
 
 import Import
 
-import Control.Monad (mzero)
 import qualified Data.Text as T
 import Data.Aeson
-import Data.Aeson.Types (Parser)
 import Text.Julius
 import Yesod.WebSockets
 import Turing.Examples
