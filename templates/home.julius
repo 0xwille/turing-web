@@ -4,8 +4,8 @@ $(function() {
     bBackward   : $("##{rawJS butBackward}"),
     bTogglePlay : $("##{rawJS butTogglePlay}"),
     bForward    : $("##{rawJS butForward}"),
-    results     : $("##{rawJS results}"),
-    state       : $("##{rawJS state}")
+    prTape      : $("##{rawJS prTape}"),
+    prTrans     : $("##{rawJS prTrans}")
   };
   var pollInterval = 10000;
   var playing = false;
@@ -65,12 +65,11 @@ $(function() {
     alert("SOCKET CLOSED! D: (" + e.code + ")");
   };
   sock.onmessage = function (e) {
-    // var data = JSON.parse(e.data);
-    var data = e.data;
-    if (data[1] === "+") {
-      ui.state.html(data);
-    } else {
-      ui.results.html(data);
+    var data = JSON.parse(e.data);
+    if (data["type"] === "tape") {
+      ui.prTape.html(data["value"]);
+    } else if (data["type"] === "trans") {
+      ui.prTrans.html(data["value"]);
     }
   };
   sock.onerror = function (e) {
