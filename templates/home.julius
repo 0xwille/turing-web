@@ -12,6 +12,7 @@ $(function() {
   var pollInterval = 10000;
   var playing = false;
   var timeout = 150;
+  var transBak = "";
   function poll() {
     sock.send("Poll");
     setTimeout(poll, pollInterval);
@@ -78,9 +79,22 @@ $(function() {
     if (data["type"] === "tape") {
       ui.prTape.html(data["value"]);
     } else if (data["type"] === "trans") {
-      ui.prTrans.html(data["value"]);
+      transBak = data["value"];
+      ui.prTrans.html(transBak);
     } else if (data["type"] === "stop") {
       togglePlay();
+    } else if (data["type"] === "bold") {
+      var idx = parseInt(data["value"]);
+      if (idx >= 0) {
+        var trans = transBak.split("\n");
+        idx = idx+3;
+        trans[idx] = "<div style=\"display: inline; color: #ffffff; " +
+                     "background-color: #000000\">" + trans[idx] + "</div>";
+        trans[idx+1] = trans[idx+1]
+        ui.prTrans.html(trans.join("\n"));
+      } else {
+        ui.prTrans.html(transBak);
+      }
     }
   };
   sock.onerror = function (e) {
