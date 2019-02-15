@@ -2,7 +2,7 @@ Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
   approot: "http://localhost:3000"
-  copyright: © 2014-2015 Guillermo Ramos (guillermo.ramos@imdea.org)
+  copyright: © 2014-2019 Guillermo Ramos (guillermo.ramos@imdea.org)
   #analytics: UA-YOURCODE
 
 Development:
@@ -15,5 +15,5 @@ Staging:
   <<: *defaults
 
 Production:
-  approot: "https://turing.heimi.li"
+  approot: "https://turing.gramos.me"
   <<: *defaults
