@@ -1,3 +1,3 @@
 # Turing Machine simulator
 
-Demo available at: http://turing.heimi.li
+Demo available at: http://turing.gramos.me
